@@ -1,32 +1,291 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT</title>
-    <style>
-        /* Elimina los márgenes por defecto del navegador */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Evita barras de scroll dobles */
-        }
+    <title>PedusGPT 1.0 - Personal NVIDIA NIM Hub</title>
+    <!-- Tailwind CSS (v4) -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Marked.js para formatear texto IA (Markdown) -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Prism.js para resaltar bloques de código técnico -->
+    <link href="https://cloudflare.com" rel="stylesheet" />
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
 
-        /* Configura el iframe para ocupar toda la pantalla */
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none; /* Elimina el borde por defecto */
-            display: block; /* Elimina espacios en blanco en la base */
-        }
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .code-block { font-family: 'JetBrains Mono', monospace; }
+        .glow-nvidia { box-shadow: 0 0 20px rgba(118, 185, 0, 0.15); }
+        .glow-nvidia-focus:focus-within { box-shadow: 0 0 25px rgba(118, 185, 0, 0.25); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #76b900; }
+        
+        /* Estilos personalizados para el renderizado de tablas en Markdown */
+        .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+        .prose th { background-color: #0f172a; padding: 0.5rem; text-align: left; border: 1px solid #334155; color: #76b900; }
+        .prose td { padding: 0.5rem; border: 1px solid #1e293b; }
+        .prose ul { list-style-type: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
+        .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin: 0.5rem 0; }
     </style>
 </head>
-<body>
+<body class="h-full flex flex-col overflow-hidden">
 
-    <!-- Reemplaza la URL de src por la página que quieras mostrar -->
-    <iframe src="https://azureserv.com/__cpi.php?s=aXZqM0xLVXZpY3FBbHNKN0VOMy9vQVVvTG91UFRkTEgvRkRUanpTa3BSR09oVTYzajhHNmJodmlXM3ZpOVBQdUM3NHR5OFc1SmFyRHVkQVpLQW8yZzBoZTE4ZDhoQ1pWWW0wbkNQOFR5NWtyMDlnSXdRM0hadGlXdjc5Zk9pT2ZPNXVGdGlPdHBYYjVIT1JOTmQ3dmVBPT0%3D&r=aHR0cHM6Ly9henVyZXNlcnYuY29tLz9fX2Nwbz1hSFIwY0hNNkx5OXhkMlZ1TG1GcA%3D%3D&__cpo=1"></iframe>
+    <!-- Encabezado Principal -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 bg-gradient-to-tr from-[#76b900] to-green-400 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/20">
+                <i class="fa-solid fa-microchip text-slate-950 font-bold text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-[#76b900] bg-clip-text text-transparent">
+                    PedusGPT <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#76b900]/10 text-[#76b900] border border-[#76b900]/20 ml-1">1.0</span>
+                </h1>
+                <p class="text-xs text-slate-400">Direct NVIDIA NIM API Client</p>
+            </div>
+        </div>
 
-</body>
-</html>
+        <div class="flex items-center space-x-4">
+            <div id="badgeStatus" class="flex items-center space-x-2 text-xs bg-slate-950 border border-slate-800 rounded-full px-3 py-1.5">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-slate-400 font-medium">Autenticación Directa</span>
+            </div>
+            <button id="btnNewChat" class="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-plus text-[#76b900]"></i> Nuevo Chat
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal de la App -->
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <!-- Barra Lateral Izquierda -->
+        <aside class="w-80 bg-slate-900/40 border-r border-slate-800/80 p-5 hidden md:flex flex-col space-y-6 overflow-y-auto shrink-0">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">ID del Modelo NVIDIA NIM</label>
+                <select id="modelId" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-[#76b900]">
+                    <option value="meta/llama-3.1-405b-instruct">meta/llama-3.1-405b-instruct (Recomendado)</option>
+                    <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct</option>
+                    <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct</option>
+                    <option value="nvidia/llama-3.1-nemotron-70b-instruct">nvidia/llama-3.1-nemotron-70b-instruct</option>
+                    <option value="mistralai/mixtral-8x22b-instruct-v0.1">mistralai/mixtral-8x22b-instruct</option>
+                    <option value="microsoft/phi-3-medium-128k-instruct">microsoft/phi-3-medium-128k</option>
+                </select>
+                <p class="text-[10px] text-slate-500 mt-1">Modelos oficiales de la pasarela de NVIDIA Cloud.</p>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">System Prompt (Personalidad)</label>
+                <textarea id="systemPrompt" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 focus:outline-none focus:border-[#76b900] resize-none" placeholder="Configura las instrucciones iniciales del sistema aquí..."></textarea>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- Hiperparámetros de Generación -->
+            <div class="space-y-5">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Parámetros IA</h4>
+                
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Temperatura (Creatividad)</span>
+                        <span id="valTemp" class="text-[#76b900] font-mono">0.7</span>
+                    </div>
+                    <input type="range" id="paramTemp" min="0" max="1" step="0.1" value="0.7" class="w-full accent-[#76b900] bg-slate-950 cursor-pointer">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Tokens Máximos</span>
+                        <span id="valTokens" class="text-[#76b900] font-mono">1024</span>
+                    </div>
+                    <input type="range" id="paramTokens" min="256" max="4096" step="128" value="1024" class="w-full accent-[#76b900] bg-slate-950 cursor-pointer">
+                </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-slate-800/40 text-center flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                <span>Sesión Privada Autónoma</span>
+                <span>PedusGPT v1.0</span>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Chat -->
+        <main class="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+            <!-- Malla ciberpunk decorativa de fondo -->
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35 pointer-events-none"></div>
+
+            <!-- Contenedor de Mensajes Escroleable -->
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 scroll-smooth">
+                <!-- Tarjeta de Bienvenida Inicial -->
+                <div id="welcomeCard" class="max-w-3xl mx-auto bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 text-center space-y-4 glow-nvidia backdrop-blur-sm mt-12">
+                    <div class="h-12 w-12 bg-[#76b900]/10 border border-[#76b900]/30 rounded-full flex items-center justify-center mx-auto text-[#76b900]">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-100 font-mono tracking-tight">Bienvenido a PedusGPT 1.0</h3>
+                    <p class="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                        Tu API Key integrada se está usando directamente para comunicarse con **NVIDIA Cloud** mediante llamadas seguras HTTPS sin servidores intermediarios.
+                    </p>
+                    <div id="keyCheckAlert" class="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg p-3 max-w-sm mx-auto hidden">
+                        <i class="fa-solid fa-circle-check mr-1"></i> API Key detectada en el código. ¡Todo listo para chatear!
+                    </div>
+                    <div id="keyMissingAlert" class="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg p-3 max-w-sm mx-auto hidden">
+                    <script>
+const NVIDIA_API_KEY = "nvapi-TU_CLAVE_DE_NVIDIA_AQUI";
+// Memoria e Historial de la Conversación
+let conversationHistory = [];
+const defaultSystemPrompt = "Eres PedusGPT 1.0, un asistente de inteligencia artificial avanzado impulsado por los modelos NIM corporativos de NVIDIA. Eres extremadamente inteligente, técnico, estructurado y claro en tus explicaciones. Utiliza formato Markdown muy limpio para enriquecer tus respuestas (listas, tablas si son pertinentes, negritas y bloques de código con su respectivo lenguaje especificado).";
+// Elementos interactivos del DOM
+const chatContainer = document.getElementById('chatContainer');
+const chatForm = document.getElementById('chatForm');
+const userInput = document.getElementById('userInput');
+const systemPromptInput = document.getElementById('systemPrompt');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const welcomeCard = document.getElementById('welcomeCard');
+const badgeStatus = document.getElementById('badgeStatus');
+// Alertas visuales iniciales
+const keyCheckAlert = document.getElementById('keyCheckAlert');
+const keyMissingAlert = document.getElementById('keyMissingAlert');
+// Controles de Sliders
+const paramTemp = document.getElementById('paramTemp');
+const valTemp = document.getElementById('valTemp');
+const paramTokens = document.getElementById('paramTokens');
+const valTokens = document.getElementById('valTokens');
+// Inicialización de Estados
+systemPromptInput.value = defaultSystemPrompt;
+paramTemp.addEventListener('input', (e) => valTemp.textContent = e.target.value);
+paramTokens.addEventListener('input', (e) => valTokens.textContent = e.target.value);
+// Comprobación inicial de la clave insertada en el código fuente
+if (NVIDIA_API_KEY && !NVIDIA_API_KEY.includes("TU_CLAVE_DE_NVIDIA_AQUI")) {
+keyCheckAlert.classList.remove('hidden');
+badgeStatus.querySelector('span').className = "h-2 w-2 rounded-full bg-emerald-500 animate-pulse";
+badgeStatus.querySelectorAll('span')[1].textContent = "API Key Lista";
+} else {
+keyMissingAlert.classList.remove('hidden');
+badgeStatus.querySelector('span').className = "h-2 w-2 rounded-full bg-amber-500 animate-pulse";
+badgeStatus.querySelectorAll('span')[1].textContent = "Falta API Key";
+}
+// Enviar al pulsar Enter sin Shift
+userInput.addEventListener('keydown', (e) => {
+if (e.key === 'Enter' && !e.shiftKey) {
+e.preventDefault();
+chatForm.requestSubmit();
+}
+});
+// Reinicio de Chat Completo
+document.getElementById('btnNewChat').addEventListener('click', () => {
+conversationHistory = [];
+chatContainer.innerHTML = <div class="text-center text-xs font-mono text-slate-500 py-6 border border-dashed border-slate-800 rounded-xl max-w-md mx-auto mt-6"> <i class="fa-solid fa-trash-can mr-1"></i> Memoria e historial reiniciados para PedusGPT 1.0. </div>;
+});
+// Pintar Mensajes en la Interfaz de Usuario
+function appendMessage(role, text) {
+// Eliminar tarjeta de bienvenida si es el primer mensaje
+if(document.getElementById('welcomeCard')) {
+welcomeCard.remove();
+}
+const messageWrapper = document.createElement('div');
+messageWrapper.className = w-full border-b border-slate-900/40 py-6 ${role === 'user' ? 'bg-slate-900/10' : 'bg-slate-900/40 border-y border-slate-900/80'};
+const innerContainer = document.createElement('div');
+innerContainer.className = "max-w-3xl mx-auto flex items-start space-x-4 px-4";
+const avatar = document.createElement('div');
+if (role === 'user') {
+avatar.className = "h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-slate-300 text-xs";
+avatar.innerHTML = '';
+} else {
+avatar.className = "h-8 w-8 rounded-full bg-gradient-to-tr from-[#76b900] to-green-500 flex items-center justify-center shrink-0 text-slate-950 text-xs font-black shadow-md shadow-[#76b900]/10";
+avatar.innerHTML = 'P';
+}
+const contentBox = document.createElement('div');
+contentBox.className = "flex-1 text-sm space-y-1 overflow-hidden text-slate-200";
+const nameLabel = document.createElement('div');
+nameLabel.className = text-xs font-bold uppercase tracking-wider ${role === 'user' ? 'text-slate-400' : 'text-[#76b900]'};
+nameLabel.innerText = role === 'user' ? 'TÚ' : 'PedusGPT 1.0';
+const messageBody = document.createElement('div');
+messageBody.className = "prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-2 selection:bg-[#76b900]/30";
+if (role === 'assistant') {
+// Configurar marcado Markdown avanzado
+marked.setOptions({ gfm: true, breaks: true });
+messageBody.innerHTML = marked.parse(text);
+// Aplicar Highlight sintáctico para bloques de código inyectados
+setTimeout(() => {
+messageBody.querySelectorAll('pre code').forEach((block) => {
+Prism.highlightElement(block);
+block.parentElement.classList.add('rounded-lg', 'border', 'border-slate-800', 'my-3', 'bg-slate-950/80', 'p-4');
+});
+}, 40);
+} else {
+messageBody.textContent = text;
+}
+contentBox.appendChild(nameLabel);
+contentBox.appendChild(messageBody);
+innerContainer.appendChild(avatar);
+innerContainer.appendChild(contentBox);
+messageWrapper.appendChild(innerContainer);
+chatContainer.appendChild(messageWrapper);
+// Autoscroll hacia el final del chat
+chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+// Intercepción y envío del Chat
+chatForm.addEventListener('submit', async (e) => {
+e.preventDefault();
+if (!NVIDIA_API_KEY || NVIDIA_API_KEY.includes("TU_CLAVE_DE_NVIDIA_AQUI")) {
+alert("❌ Por favor, edita el archivo index.html e introduce tu clave API en la línea 170.");
+return;
+}
+const text = userInput.value.trim();
+if (!text) return;
+// Limpieza inicial
+userInput.value = '';
+loadingIndicator.classList.replace('hidden', 'flex');
+// Renderizar mensaje del usuario
+appendMessage('user', text);
+// Crear el payload con el System Prompt dinámico + Historial
+let currentPayload = [
+{ role: "system", content: systemPromptInput.value.trim() || defaultSystemPrompt }
+];
+// Combinar con la memoria activa de la sesión
+conversationHistory.forEach(msg => currentPayload.push(msg));
+currentPayload.push({ role: "user", content: text });
+try {
+// Llamada directa HTTPS hacia el endpoint oficial de NVIDIA NIM Cloud
+const response = await fetch("nvidia.com", {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'Authorization': Bearer ${NVIDIA_API_KEY}
+},
+body: JSON.stringify({
+model: document.getElementById('modelId').value,
+messages: currentPayload,
+temperature: parseFloat(paramTemp.value),
+max_tokens: parseInt(paramTokens.value),
+top_p: 1.0,
+stream: false
+})
+});
+const data = await response.json();
+if (!response.ok) {
+throw new Error(data.error?.message || data.message || 'Error en los nodos de NVIDIA NIM.');
+}
+const aiReply = data.choices.message.content;
+// Guardar la secuencia en el historial persistente de la sesión
+conversationHistory.push({ role: "user", content: text });
+conversationHistory.push({ role: "assistant", content: aiReply });
+// Renderizar la respuesta de PedusGPT 1.0
+appendMessage('assistant', aiReply);
+} catch (error) {
+console.error(error);
+appendMessage('assistant', ❌ **Error de comunicación directa:** No se pudo resolver la petición con NVIDIA NIM.\n\n*Detalles Técnicos:* \${error.message}`. Revisa que tu API Key pegada en el código sea válida.`);
+} finally {
+loadingIndicator.classList.replace('flex', 'hidden');
+}
+});
